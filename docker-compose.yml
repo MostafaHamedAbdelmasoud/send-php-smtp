@@ -1,7 +1,7 @@
 # /docker/wedding-api-2/docker-compose.yml
 #
-# Second copy of the wedding email API, running the new send-mail.php (encrypted per-site credentials + templates).
-# Runs beside /docker/wedding-api, which stays untouched as the fallback. Same Traefik (n8n_default network),
+# The wedding email API, running the new send-mail.php (encrypted per-site credentials + templates).
+# Replaces /docker/wedding-api (stopped, kept as the fallback). Same Traefik (n8n_default network),
 # its own hostname, container name and router/service names so nothing clashes.
 
 services:
@@ -13,13 +13,13 @@ services:
       # Apache's docroot: send-mail.php + templates/
       - ./public:/var/www/html:ro
       # one level ABOVE the docroot, where load_env() looks. Not web-reachable.
-      # Holds only MAIL_ENCRYPTION_KEY + ALLOWED_ORIGINS.
+      # Holds MAIL_ENCRYPTION_KEY, ALLOWED_ORIGINS and the one sending account (SMTP_*).
       - ./.env:/var/www/.env:ro
     networks:
       - n8n_default
     labels:
       - traefik.enable=true
-      - traefik.http.routers.weddingapi2.rule=Host(`api2.maryamandmahmoud.com`)
+      - traefik.http.routers.weddingapi2.rule=Host(`api.maryamandmahmoud.com`)
       - traefik.http.routers.weddingapi2.entrypoints=websecure
       - traefik.http.routers.weddingapi2.tls=true
       - traefik.http.routers.weddingapi2.tls.certresolver=mytlschallenge

@@ -8,10 +8,13 @@
 // served), or one folder above it, outside the web root (safest). No dependencies: a small SMTP client
 // (STARTTLS / implicit TLS) is at the bottom.
 //
-// One script, many invitations: each site sends its whole mail setup (SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER,
-// SMTP_PASS, SMTP_FROM, SMTP_TO) as "credentials", a token encrypted with MAIL_ENCRYPTION_KEY (see EMAIL.md and
-// scripts/mail-credentials.mjs). So the server's .env only needs MAIL_ENCRYPTION_KEY and ALLOWED_ORIGINS. Any SMTP_*
-// value in .env is used only for a request that sends no token.
+// One script, many invitations: the sending account lives in this server's .env (SMTP_HOST, SMTP_PORT, SMTP_SECURE,
+// SMTP_USER, SMTP_PASS, SMTP_FROM) and is the same for every site, so no site ever carries that password. Each site
+// sends only the couple's own address as "credentials", a token encrypted with MAIL_ENCRYPTION_KEY (see EMAIL.md and
+// scripts/mail-credentials.mjs): {"to":"couple@example.com"}. It stays encrypted rather than a plain request field so
+// that a site can only ever mail its own couple, and not anyone who calls this API.
+//
+// Older tokens that carry the whole setup still work: whatever a token holds overrides .env for that one request.
 
 declare(strict_types=1);
 
@@ -108,6 +111,8 @@ if ((int) ($input['elapsed'] ?? 0) < 2000) {
 function field(array $input, string $key, int $max): string
 {
     $value = $input[$key] ?? '';
+    // a site may send a count as JSON text ("2") or as a number (2); both mean the same thing here
+    if (is_int($value) || is_float($value)) $value = (string) $value;
     if (!is_string($value)) return '';
     $value = trim(preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $value) ?? '');
     return mb_substr($value, 0, $max);
@@ -116,6 +121,11 @@ function field(array $input, string $key, int $max): string
 $type = field($input, 'type', 10);
 $name = field($input, 'name', 80);
 if ($name === '' || !in_array($type, ['rsvp', 'wish'], true)) respond(400, ['ok' => false, 'error' => 'invalid']);
+
+// Optional: if the invitation asks the guest for an address, the couple's reply goes straight to them.
+// Anything that isn't a real address is dropped rather than refused, so a typo can't cost a guest their RSVP.
+$guestEmail = field($input, 'email', 254);
+if ($guestEmail !== '' && !filter_var($guestEmail, FILTER_VALIDATE_EMAIL)) $guestEmail = '';
 
 // The site names its email template (a folder in templates/); an unknown or missing name gets templates/default
 [$templateDir, $templateData] = load_template(field($input, 'template', 64));
@@ -163,7 +173,7 @@ $hits[] = $now;
 // ---- send ---------------------------------------------------------------------------------
 
 try {
-    smtp_send($env, $subject, $text, $html);
+    smtp_send($env, $subject, $text, $html, $guestEmail);
     respond(200, ['ok' => true]);
 } catch (Throwable $e) {
     error_log('send-mail: ' . $e->getMessage());
@@ -243,10 +253,11 @@ function render_template(string $template, array $data, callable $escape): strin
 // ---- encrypted credentials -----------------------------------------------------------------
 
 /**
- * Token = base64url( 12-byte IV | 16-byte GCM tag | AES-256-GCM ciphertext of
- *         {"host","port","secure","user","pass","from","to"} ).
- * Returns the SMTP_* values, or null if the key is missing or wrong, or the token was tampered with.
- * host / port / secure may be missing (tokens made before they were added); .env then supplies them.
+ * Token = base64url( 12-byte IV | 16-byte GCM tag | AES-256-GCM ciphertext of {"to", …} ).
+ * Returns the SMTP_* values the token carries, or null if the key is missing or wrong, or the token was
+ * tampered with. Only "to" (the couple's address) is required: that is all a site needs to send, and the
+ * sending account comes from .env. The rest may be present — older tokens carry the whole setup — and then
+ * overrides .env for that request.
  */
 function decrypt_credentials(string $token, string $encodedKey): ?array
 {
@@ -258,12 +269,9 @@ function decrypt_credentials(string $token, string $encodedKey): ?array
     $data = $plain === false ? null : json_decode($plain, true);
     if (!is_array($data)) return null;
 
-    $out = [];
-    foreach (['user' => 'SMTP_USER', 'pass' => 'SMTP_PASS', 'from' => 'SMTP_FROM', 'to' => 'SMTP_TO'] as $field => $name) {
-        if (!isset($data[$field]) || !is_string($data[$field]) || $data[$field] === '') return null;
-        $out[$name] = $data[$field];
-    }
-    foreach (['host' => 'SMTP_HOST', 'port' => 'SMTP_PORT', 'secure' => 'SMTP_SECURE'] as $field => $name) {
+    if (!isset($data['to']) || !is_string($data['to']) || $data['to'] === '') return null;
+    $out = ['SMTP_TO' => $data['to']];
+    foreach (['user' => 'SMTP_USER', 'pass' => 'SMTP_PASS', 'from' => 'SMTP_FROM', 'host' => 'SMTP_HOST', 'port' => 'SMTP_PORT', 'secure' => 'SMTP_SECURE'] as $field => $name) {
         if (isset($data[$field]) && is_string($data[$field]) && $data[$field] !== '') $out[$name] = $data[$field];
     }
     // a hostname or IP, and a real port
@@ -293,7 +301,7 @@ function encode_mailbox(string $value): string
     return '<' . address($value) . '>';
 }
 
-function smtp_send(array $env, string $subject, string $text, string $html): void
+function smtp_send(array $env, string $subject, string $text, string $html, string $replyTo = ''): void
 {
     $host = $env['SMTP_HOST'];
     $port = (int) $env['SMTP_PORT'];
@@ -357,6 +365,8 @@ function smtp_send(array $env, string $subject, string $text, string $html): voi
         'Message-ID: <' . bin2hex(random_bytes(12)) . '@' . (explode('@', $from)[1] ?? 'localhost') . '>',
         'MIME-Version: 1.0',
     ];
+    // the mail is sent by the service's own account, so a reply belongs to the guest, not to that account
+    if ($replyTo !== '') $headers[] = 'Reply-To: <' . $replyTo . '>';
     // plain-text and HTML versions of the same message; mail apps show the best one they support
     $boundary = 'b' . bin2hex(random_bytes(12));
     $headers[] = "Content-Type: multipart/alternative; boundary=\"$boundary\"";
