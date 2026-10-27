@@ -1,0 +1,8 @@
+{{badge_ar}} · {{badge_en}}
+
+{{#rows}}{{label_ar}} / {{label_en}}: {{value}}
+{{/rows}}{{#quote}}
+«{{quote}}»
+{{/quote}}
+—
+{{groom_ar}} و{{bride_ar}} · {{groom}} & {{bride}} · {{date_ar}}
