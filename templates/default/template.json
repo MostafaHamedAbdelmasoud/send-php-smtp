@@ -1,0 +1,10 @@
+{
+  "title_ar": "دعوة زفاف",
+  "title_en": "Wedding invitation",
+  "timezone": "Africa/Cairo",
+  "badges": {
+    "attending": { "ink": "#F3E0B0", "bg": "#4D1422" },
+    "not_attending": { "ink": "#4D1422", "bg": "#EFE4D6" },
+    "wish": { "ink": "#300A13", "bg": "#E9D3A0" }
+  }
+}

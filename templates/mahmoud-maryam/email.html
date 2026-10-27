@@ -1,0 +1,39 @@
+<!doctype html>
+<!--
+  Mahmoud & Maryam: the original email design (emerald, ivory, antique gold), kept as its own template.
+  Filled in by send-mail.php; see ../README.md for the {{placeholders}}. Names and date are in template.json.
+-->
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>{{badge_en}}</title></head>
+<body style="margin:0;padding:0;background:#efe7d6;">
+<div style="display:none;max-height:0;overflow:hidden;">{{badge_ar}} · {{badge_en}} — {{guest}}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#efe7d6;padding:28px 12px;">
+<tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#fffdf8;border-radius:18px;overflow:hidden;box-shadow:0 18px 40px -24px rgba(20,69,58,.45);font-family:Tahoma,'Segoe UI',Arial,sans-serif;" dir="rtl">
+  <tr><td align="center" style="background:#14453a;background-image:radial-gradient(circle at 50% 0%,#24614f 0%,#14453a 60%,#0f362d 100%);padding:34px 24px 28px;">
+    <div style="width:46px;height:46px;line-height:46px;margin:0 auto 14px;border-radius:50%;background:#d8bd82;color:#14453a;font-size:20px;">♥</div>
+    <div style="font-family:'Amiri','Times New Roman',serif;font-size:34px;line-height:1.2;color:#f6efe0;font-weight:bold;">{{groom_ar}} <span style="color:#d8bd82;font-weight:normal;">&amp;</span> {{bride_ar}}</div>
+    <div style="margin-top:6px;font-family:Georgia,'Times New Roman',serif;font-size:15px;letter-spacing:.06em;color:#d8bd82;" dir="ltr">{{groom}} &amp; {{bride}}</div>
+    <div style="margin-top:12px;font-size:13px;color:#cfe0d8;">{{date_ar}} · <span dir="ltr">{{date_en}}</span></div>
+  </td></tr>
+  <tr><td style="height:4px;background:#d8bd82;background-image:linear-gradient(90deg,#b08a42,#e6cf98,#b08a42);"></td></tr>
+  <tr><td align="center" style="padding:28px 32px 6px;">
+    <span style="display:inline-block;padding:8px 18px;border-radius:999px;background:{{badge_bg}};color:{{badge_ink}};font-size:15px;font-weight:bold;">{{badge_ar}} <span style="opacity:.55;">·</span> <span dir="ltr">{{badge_en}}</span></span>
+  </td></tr>
+  {{#quote}}
+  <tr><td style="padding:8px 32px 4px;"><div style="border-right:3px solid #b08a42;background:#fbf8f1;border-radius:8px;padding:18px 20px;">
+    <div style="font-family:'Amiri','Times New Roman',serif;font-size:30px;line-height:1;color:#b08a42;">”</div>
+    <div style="font-size:17px;line-height:1.9;color:#1f2a24;white-space:pre-wrap;" dir="auto">{{quote}}</div></div></td></tr>
+  {{/quote}}
+  <tr><td style="padding:14px 32px 26px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+      {{#rows}}<tr><td style="{{^first}}border-top:1px solid #eadfc8;{{/first}}padding:12px 0;width:42%;vertical-align:top;text-align:right;"><div style="font-size:14px;color:#6b6256;">{{label_ar}}</div><div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#a89a80;text-align:right;">{{label_en}}</div></td><td style="{{^first}}border-top:1px solid #eadfc8;{{/first}}padding:12px 0;vertical-align:middle;text-align:left;font-size:16px;font-weight:bold;color:#1f2a24;"><span dir="auto">{{value}}</span></td></tr>{{/rows}}
+    </table>
+  </td></tr>
+  <tr><td align="center" style="background:#f6efe0;padding:18px 24px;border-top:1px solid #eadfc8;">
+    <div style="font-size:12px;color:#8a7f6c;">أُرسلت من دعوة زفاف {{groom_ar}} و{{bride_ar}}</div>
+    <div style="font-size:11px;color:#a89a80;margin-top:2px;" dir="ltr">Sent from the wedding invitation · {{venue_en}}</div>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>

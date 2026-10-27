@@ -1,0 +1,16 @@
+{
+  "groom_ar": "خالد",
+  "bride_ar": "شروق",
+  "groom": "Khaled",
+  "bride": "Shorouk",
+  "date_ar": "الأحد ٦ ديسمبر ٢٠٢٦",
+  "date_en": "Sunday 6 December 2026",
+  "venue_ar": "قلعة جرين بلازا",
+  "venue_en": "Green Plaza Castle",
+  "timezone": "Africa/Cairo",
+  "badges": {
+    "attending": { "ink": "#F3E0B0", "bg": "#4D1422" },
+    "not_attending": { "ink": "#4D1422", "bg": "#EFE4D6" },
+    "wish": { "ink": "#300A13", "bg": "#E9D3A0" }
+  }
+}

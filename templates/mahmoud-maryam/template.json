@@ -1,0 +1,16 @@
+{
+  "groom_ar": "محمود",
+  "bride_ar": "مريم",
+  "groom": "Mahmoud",
+  "bride": "Maryam",
+  "date_ar": "السبت ٥ ديسمبر ٢٠٢٦",
+  "date_en": "Saturday 5 December 2026",
+  "venue_ar": "وايت بلازا عسكر جروب، مدينة نصر",
+  "venue_en": "White Plaza Askar Group, Nasr City",
+  "timezone": "Africa/Cairo",
+  "badges": {
+    "attending": { "ink": "#14453a", "bg": "#e3efe9" },
+    "not_attending": { "ink": "#8a3b2e", "bg": "#f6e6e1" },
+    "wish": { "ink": "#7a5a1c", "bg": "#f5ecd9" }
+  }
+}
